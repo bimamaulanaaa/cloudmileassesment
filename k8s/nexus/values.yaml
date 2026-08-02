@@ -3,14 +3,14 @@ replicaCount: 1
 fullnameOverride: nexus
 
 image:
-  repository: us-central1-docker.pkg.dev/PROJECT_ID/nexus/nexus-gcs
+  repository: us-central1-docker.pkg.dev/whybima/nexus/nexus-gcs
   tag: "3.61.0"
   pullPolicy: IfNotPresent
 
 serviceAccount:
   create: true
   name: nexus
-  gcpServiceAccount: nexus-gcs@PROJECT_ID.iam.gserviceaccount.com
+  gcpServiceAccount: nexus-gcs@whybima.iam.gserviceaccount.com
 
 service:
   type: LoadBalancer
