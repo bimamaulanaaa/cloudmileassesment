@@ -1,0 +1,24 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+!example.tfvars
+override.tf
+override.tf.json
+.terraformrc
+terraform.rc
+
+# GCP service account keys / secrets
+*.json
+!**/package.json
+sa-key*.json
+credentials*.json
+
+# Local tooling
+.claude/
+cloudmileassesment/
+
+# OS
+.DS_Store
