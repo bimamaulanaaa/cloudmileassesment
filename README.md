@@ -28,18 +28,19 @@ Client ──> GKE LoadBalancer ──> Nexus Pod (custom image, 1x n1-standard-
 
 | # | Subtask                     | Deliverable                                   | Status |
 |---|-----------------------------|-----------------------------------------------|--------|
-| 1 | Custom container            | `docker/Dockerfile`                           | Done — builds locally, plugin `.kar` downloads successfully. |
+| 1 | Custom container            | `docker/Dockerfile`                           | Done — builds locally; plugin verified loaded ([screenshot](captures/blob-store-gcs-type.png)). |
 | 2 | Kubernetes configs (Helm)   | `k8s/nexus/`                                  | Done — `helm lint` + `helm template` pass. |
 | 3 | GCP resources (Terraform)   | `terraform/`                                  | Done — `terraform validate` passes; `plan` produces 10 resources. |
 | 4 | Deploy                      | `captures/`                                   | Blocked — see note below. |
 | 5 | Continuous integration      | This README, section [5](#5-continuous-integration-cicd) | Done. |
 
-### Version pairing (why 3.61.0 / 0.61.0)
+### Evidence — GCS blob store plugin loaded
 
-The community `nexus-blobstore-google-cloud` plugin uses a matched scheme
-(plugin `0.X` targets Nexus `3.X`) and was archived in Nov 2024. `0.61.0` is the
-final open-source release, so `3.61.0` is the newest Nexus version with a
-version-matched, freely available plugin.
+Running the custom image and opening **Blob Stores → Create** shows
+**Google Cloud Storage** available as a blob store type, confirming the plugin
+is correctly installed in the image:
+
+![Google Cloud Storage blob store type available in Nexus](captures/blob-store-gcs-type.png)
 
 ### Note on subtask 4 (deploy)
 
@@ -112,9 +113,3 @@ automatically.
 **Promotion.** The test environment deploys automatically on every change; promotion
 to production is a separate, gated step (manual approval or a release tag) that
 reuses the same SHA-tagged image — build once, promote the same artifact.
-
-**Alternative (GitOps).** Instead of pushing from CI, a tool like **Argo CD** or
-**Flux** watches the repo and continuously reconciles the cluster to match Git.
-CI then only builds/pushes the image and bumps the tag in the chart; the GitOps
-controller handles the deploy. This gives auditability and automatic drift
-correction.
