@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nexus.name" . }}
+  labels:
+    {{- include "nexus.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "nexus.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "nexus.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      securityContext:
+        fsGroup: {{ .Values.podSecurityContext.fsGroup }}
+      containers:
+        - name: nexus
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8081
+          env:
+            - name: INSTALL4J_ADD_VM_PARAMS
+              value: "-Xms{{ .Values.jvm.minHeap }} -Xmx{{ .Values.jvm.maxHeap }} -XX:MaxDirectMemorySize={{ .Values.jvm.maxDirectMemory }}"
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            periodSeconds: 30
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            periodSeconds: 15
+            failureThreshold: 6
+          volumeMounts:
+            - name: nexus-data
+              mountPath: {{ .Values.persistence.mountPath }}
+      volumes:
+        - name: nexus-data
+        {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "nexus.name" . }}-data
+        {{- else }}
+          emptyDir: {}
+        {{- end }}

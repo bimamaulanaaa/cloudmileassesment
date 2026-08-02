@@ -1,0 +1,45 @@
+replicaCount: 1
+
+fullnameOverride: nexus
+
+image:
+  repository: us-central1-docker.pkg.dev/PROJECT_ID/nexus/nexus-gcs
+  tag: "3.61.0"
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  name: nexus
+  gcpServiceAccount: nexus-gcs@PROJECT_ID.iam.gserviceaccount.com
+
+service:
+  type: LoadBalancer
+  port: 8081
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 20Gi
+  storageClass: ""
+  mountPath: /nexus-data
+
+jvm:
+  minHeap: 1200m
+  maxHeap: 1200m
+  maxDirectMemory: 1500m
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 1536Mi
+  limits:
+    memory: 3Gi
+
+podSecurityContext:
+  fsGroup: 200
+
+probes:
+  liveness:
+    initialDelaySeconds: 120
+  readiness:
+    initialDelaySeconds: 60
